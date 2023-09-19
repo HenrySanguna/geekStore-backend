@@ -21,21 +21,13 @@ app.use('/api/v1/', indexRouter);
 app.use('/api/v1/users', usersRouter);
 app.use('/api/v1/products', productsRouter);
 
-
 const PORT = process.env.PORT || 5000;
 
-mongoose.connect(process.env.MONGO, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  useCreateIndex: true,
-  useFindAndModify: false
-})
-  .then(() => {
-    console.log('Connected to mongodb');
-    app.listen(PORT, () => {
-      console.log(`running on ${PORT}`);
-    });
-  })
-  .catch(error => {
-    console.log('mongo error', error);
-  });
+const main = () => mongoose
+  .connect(process.env.MONGO)
+  .then(() => console.log('conectado a mongodb'));
+main();
+
+app.listen(PORT, () => {
+  console.log(`running on ${PORT}`);
+});

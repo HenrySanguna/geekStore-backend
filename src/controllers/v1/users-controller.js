@@ -1,15 +1,14 @@
+/* eslint-disable no-underscore-dangle */
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const users = require('../../mongo/models/users');
-const products = require('../../mongo/models/products');
+const User = require('../../mongo/models/users');
 
 const expiresIn = 60 * 20;
 
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-
-    const user = await users.findOne({ email });
+    const user = await User.findOne({ email });
     if (user) {
       const isOk = await bcrypt.compare(password, user.password);
       if (isOk) {
@@ -36,7 +35,7 @@ const createUser = async (req, res) => {
 
     const hash = await bcrypt.hash(password, 15);
 
-    await users.create({
+    await User.create({
       username,
       email,
       password: hash,
@@ -59,7 +58,7 @@ const deleteUser = async (req, res) => {
     if (!userId) {
       throw new Error('missing param userId');
     }
-    await users.findByIdAndDelete(userId);
+    await User.findByIdAndDelete(userId);
     res.send({ status: 'ok', message: 'user delete' });
   } catch (e) {
     res.status(500).send({ status: 'ERROR', message: e.message });
@@ -67,7 +66,7 @@ const deleteUser = async (req, res) => {
 };
 const getAllUser = async (req, res) => {
   try {
-    const user = await users
+    const user = await User
       .findById(req.sessionData.userId)
       .select({ data: 0, __v: 0, role: 0 });
     res.send({ status: 'ok', data: user });
@@ -80,12 +79,12 @@ const updateCupon = async (req, res) => {
   try {
     const { cupon } = req.body;
     console.log('LLega', cupon);
-    const cupon1 = await users
+    const cupon1 = await User
       .findById(req.sessionData.userId)
       .select({ cupon: 1 });
     console.log('cUPON FIND', cupon1);
     if (cupon1.cupon === '' && cupon !== cupon1.cupon && cupon !== null) {
-      await users.findByIdAndUpdate(req.sessionData.userId, {
+      await User.findByIdAndUpdate(req.sessionData.userId, {
         cupon
       });
       console.log('actualizado');
@@ -109,12 +108,12 @@ const validateCupon = async (req, res) => {
   try {
     console.log('req.sessionData', req.sessionData);
     const { cupon } = req.body;
-    const cupon1 = await users
+    const cupon1 = await User
       .findById(req.sessionData.userId)
       .select({ cupon: 1 });
     if (cupon === cupon1.cupon) {
       console.log('SIII');
-      await users.findByIdAndUpdate(req.sessionData.userId, {
+      await User.findByIdAndUpdate(req.sessionData.userId, {
         cupon: ''
       });
       res.status(200).send({ status: 'OK', message: 'cupon actualizado' });
